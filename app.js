@@ -1,15 +1,37 @@
-//jshint esversion:6
-
 const express = require("express");
-const bodyParser = require("body-parser");
-const date = require(__dirname + "/date.js");
 
 const app = express();
-
+const mongoose= require("mongoose");
+const date = require(__dirname + "/date.js");
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
+
+mongoose.connect('mongodb://localhost:27017/todoDB');
+
+const itemSchema = new mongoose.Schema({
+  name: String
+});
+
+const ITEM = mongoose.model('item', itemSchema);
+
+const tem1 = new ITEM({name: "tem1"});
+const tem2 = new ITEM({name: "tem2"});
+const tem3 = new ITEM({name: "tem3"});
+
+const defaultItems = [tem1, tem2, tem3];
+
+ITEM.insertMany(defaultItems, function(err){
+  if(err)
+  {
+    console.log("failed to insert default items.");
+  }
+  else
+  {
+    console.log("successfully logged default items.");
+  }
+});
 
 /*const items = ["Buy Food", "Cook Food", "Eat Food"];
 const workItems = [];*/ //Gonna connect to database instead
