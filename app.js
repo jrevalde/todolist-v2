@@ -7,6 +7,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
+var _ = require('lodash');
 
 mongoose.connect('mongodb://localhost:27017/todoDB');
 
@@ -22,49 +23,145 @@ const tem3 = new ITEM({name: "tem3"});
 
 const defaultItems = [tem1, tem2, tem3];
 
-ITEM.insertMany(defaultItems, function(err){
-  if(err)
-  {
-    console.log("failed to insert default items.");
-  }
-  else
-  {
-    console.log("successfully logged default items.");
-  }
+const listSchema = new mongoose.Schema({
+  name: String,
+  items: [itemSchema]
 });
+
+const List = mongoose.model("list", listSchema);
+
+
+
 
 /*const items = ["Buy Food", "Cook Food", "Eat Food"];
 const workItems = [];*/ //Gonna connect to database instead
 
-app.get("/", function(req, res) {
+app.get("/", function(req, res) 
+{
 
-const day = date.getDate();
+//console log the items from the items collection
 
-  res.render("list", {listTitle: day, newListItems: items});
-
+ITEM.find({}, function(err, foundItems)
+{
+  if (foundItems.length === 0)
+  {
+    ITEM.insertMany(defaultItems, function(err)
+    { //saves the default data if the array is empty
+      if(err)
+      {
+        console.log(err);
+      }
+      else
+      {
+        console.log("successfully logged default items.");
+      }
+    });
+    res.redirect("/");
+  }
+  else
+  {
+    //const day = date.getDate();
+    res.render("list", {listTitle: "Title", newListItems: foundItems});
+  }
 });
+});
+
+
+
+
+//dynamic route
+app.get("/:customList", function(req,res){ //so basically it means. that whatever you type after the slash becomes a new route. and then you can do whatevers.
+  const cum  = _.lowerCase(req.params.customList);
+
+
+  List.findOne({name:cum} , function(err, results){
+    if (!err){
+      if(!results)
+      {
+        //where we create a new list
+        const list = new List({
+          name: cum,
+          items: defaultItems
+        });
+        console.log("Doesn't exist. making a new list.");
+        list.save();
+        res.redirect("/" + cum);
+      }
+      else{
+        //show the existing list
+        res.render("list", {listTitle: results.name, newListItems: results.items});
+      }
+      
+    }
+  });
+  
+});
+
+
+
+
 
 app.post("/", function(req, res){
 
+
   const item = req.body.newItem;
+  const listName = req.body.list;
+  const tem = new ITEM({name: item});
 
-  if (req.body.list === "Work") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
-    res.redirect("/");
-  }
+    if(listName === "Title")
+    {
+      tem.save();
+
+      res.redirect("/");
+    }
+    else{
+      List.findOne({name: listName.trim()}, function(err, foundList){
+        if (!err)
+        {
+          if(foundList)
+          {
+            foundList.items.push(tem);
+            foundList.save();
+            res.redirect("/" + listName);
+          }
+          else{
+            console.log("oh poopy!!");
+          }
+          
+        }
+      });
+    }
+  
+  
 });
 
-app.get("/work", function(req,res){
-  res.render("list", {listTitle: "Work List", newListItems: workItems});
+
+app.post("/delete", function(req, res){
+  const checkedItem = req.body.check;
+  console.log(checkedItem + " ||");
+
+  const id = checkedItem.trim(); //sometimes mongoose acts all fucky so make sure the data passed is validated first. ;)
+ 
+    ITEM.findByIdAndRemove(id, function(err){
+      if(err)
+      {
+        console.log(err + "|| There is problem Deleting.");
+      }
+      else{
+        console.log("successfully deleted the thing.");
+        res.redirect("/");
+      }
+    });
+  
 });
+
+
+
 
 app.get("/about", function(req, res){
   res.render("about");
 });
 
 app.listen(3030, function() {
-  console.log("Server started on port 3000");
+  console.log("Server started on port 3030");
 });
