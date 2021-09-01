@@ -9,7 +9,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 var _ = require('lodash');
 
-mongoose.connect('mongodb://localhost:27017/todoDB');
+mongoose.connect('mongodb+srv://admin-jrevalde:P0rkbun101@cluster0.hz5p4.mongodb.net/todoDB'); //now its connected to mongoDB Atlas
 
 const itemSchema = new mongoose.Schema({
   name: String
