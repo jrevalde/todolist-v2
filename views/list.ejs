@@ -9,6 +9,7 @@
     <form action="/delete" method="post">
       <div class="item">
         <input type="checkbox" name="check" value=" <%= element._id %>  " onchange="this.form.submit()"> <!--This way we don't have press an ugly submit button it simply submits after a change i.e check/uncheck-->
+        <input type="hidden" name="listName" value="<%= listTitle %>">
         <p><%=  element.name %></p>
       </div>
 

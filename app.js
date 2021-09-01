@@ -138,10 +138,12 @@ app.post("/", function(req, res){
 
 app.post("/delete", function(req, res){
   const checkedItem = req.body.check;
-  console.log(checkedItem + " ||");
+  const list_Name = _.lowerCase(req.body.listName);
 
   const id = checkedItem.trim(); //sometimes mongoose acts all fucky so make sure the data passed is validated first. ;)
- 
+
+  if (list_Name === "Title")
+  {
     ITEM.findByIdAndRemove(id, function(err){
       if(err)
       {
@@ -152,6 +154,17 @@ app.post("/delete", function(req, res){
         res.redirect("/");
       }
     });
+  }
+  else
+  {
+    List.findOneAndUpdate({name: list_Name}, {$pull: {items: {_id: id}}}, function(err, foundList){
+      if (!err){
+        res.redirect("/" + list_Name);
+      }
+    });
+  }
+ 
+    
   
 });
 
