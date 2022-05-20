@@ -17,9 +17,9 @@ const itemSchema = new mongoose.Schema({
 
 const ITEM = mongoose.model('item', itemSchema);
 
-const tem1 = new ITEM({name: "tem1"});
-const tem2 = new ITEM({name: "tem2"});
-const tem3 = new ITEM({name: "tem3"});
+const tem1 = new ITEM({name: "test item 1"});
+const tem2 = new ITEM({name: "test item 2"});
+const tem3 = new ITEM({name: "test item 3"});
 
 const defaultItems = [tem1, tem2, tem3];
 
